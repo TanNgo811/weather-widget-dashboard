@@ -1,5 +1,6 @@
 import React, {useRef} from 'react';
 import {useDrag, useDrop} from 'react-dnd';
+import type {DropTargetMonitor} from 'react-dnd';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import type {CityWeatherWidgetData} from '@/types/weather';
@@ -14,6 +15,12 @@ interface WeatherWidgetProps {
   onMove: (dragIndex: number, hoverIndex: number) => void;
 }
 
+interface DragItem {
+  index: number;
+  id: string;
+  type: string;
+}
+
 const CityWeatherWidget: React.FC<WeatherWidgetProps> = ({
   id,
   index,
@@ -23,14 +30,14 @@ const CityWeatherWidget: React.FC<WeatherWidgetProps> = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: string | symbol | null }>({
     accept: 'weather-widget',
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
       };
     },
-    hover(item: { index: number }, monitor) {
+    hover(item: DragItem, monitor: DropTargetMonitor<DragItem, void>) {
       if (!ref.current) {
         return;
       }
