@@ -1,6 +1,8 @@
 # Demo Weather App
 **Stack**: React, TypeScript, Vite
 
+**Demo**: [Demo Weather App](https://tanngo811.github.io/)
+
 **Functionalities:**
 * Include a search field for the user to enter location.
 * Display hourly weather forecast for the current day

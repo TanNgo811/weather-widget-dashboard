@@ -108,7 +108,7 @@ function App() {
       {appState.mainWeatherLoading && (
         <div className="absolute w-full h-full z-20 flex items-center justify-center background-animation">
           <Loading />
-          <div className="text-white text-xl">Loading Singapore weather...</div>
+          <div className="text-white text-xl pl-2">Loading Singapore weather...</div>
         </div>
       )}
       
