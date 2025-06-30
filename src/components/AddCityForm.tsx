@@ -78,7 +78,7 @@ const AddCityForm: React.FC<AddCityFormProps> = ({ onAddCity }) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Search className="w-5 h-5" />
-          Add Singapore's City Weather Widget
+          Add Singapore's City Weather Widget (Jurong, Tampines, Woodlands, Clementi,...)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
