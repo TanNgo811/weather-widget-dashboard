@@ -78,14 +78,14 @@ const AddCityForm: React.FC<AddCityFormProps> = ({ onAddCity }) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Search className="w-5 h-5" />
-          Add City Weather Widget
+          Add Singapore's City Weather Widget
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             type="text"
-            placeholder="Enter city name..."
+            placeholder="Enter Singapore city name..."
             value={inputValue}
             onChange={handleCityChange}
             className="bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:border-white/50"

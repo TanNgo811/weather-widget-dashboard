@@ -9,7 +9,7 @@ export const getCityList = async (city: string, limit?: number): Promise<GeoLoca
   try {
     const { data } = await axios.get(`${GEO_API_BASE_URL}/direct`, {
       params: {
-        q: city,
+        q: `${city},SG`,
         limit: limit ?? 1,
         appid: API_KEY,
       },
