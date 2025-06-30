@@ -14,6 +14,7 @@ interface AddCityFormProps {
 
 const AddCityForm: React.FC<AddCityFormProps> = ({ onAddCity }) => {
   const [selectedCity, setSelectedCity] = useState<SelectedCityItem | null>(null);
+  const [inputValue, setInputValue] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [listLoading, setListLoading] = useState(false);
   const [cityList, setCityList] = useState<GeoLocation[]>([])
@@ -25,6 +26,7 @@ const AddCityForm: React.FC<AddCityFormProps> = ({ onAddCity }) => {
     }
 
     setIsSubmitting(true);
+    setInputValue('');
     try {
       await onAddCity(selectedCity);
       setSelectedCity(null);
@@ -66,11 +68,10 @@ const AddCityForm: React.FC<AddCityFormProps> = ({ onAddCity }) => {
   
   const handleCityChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    setInputValue(value);
     setSelectedCity(null)
     debouncedGetCityList(value);
   }, [debouncedGetCityList])
-
-  console.log('City List:', cityList);
   
   return (
     <Card className="bg-white/20 backdrop-blur-md border-0 text-white">
@@ -85,6 +86,7 @@ const AddCityForm: React.FC<AddCityFormProps> = ({ onAddCity }) => {
           <Input
             type="text"
             placeholder="Enter city name..."
+            value={inputValue}
             onChange={handleCityChange}
             className="bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:border-white/50"
             disabled={isSubmitting}

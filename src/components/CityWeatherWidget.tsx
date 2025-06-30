@@ -115,14 +115,12 @@ const CityWeatherWidget: React.FC<WeatherWidgetProps> = ({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Current Weather */}
           <div className="text-center">
             <div className="text-3xl font-bold mb-1">{Math.floor(current.temp)}°C</div>
             <div className="text-sm opacity-80 mb-2">{current.condition}</div>
             <div className="text-xs opacity-70">Feels like {Math.floor(current.feels_like)}°C</div>
           </div>
-
-          {/* Weather Details */}
+          
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="flex items-center gap-1">
               <CloudRain className="w-3 h-3" />
@@ -134,7 +132,6 @@ const CityWeatherWidget: React.FC<WeatherWidgetProps> = ({
             </div>
           </div>
 
-          {/* Tomorrow's Forecast */}
           <div className="border-t border-white/20 pt-3">
             <div className="grid grid-cols-3 gap-2 text-sm">
               {daily.map(day => (

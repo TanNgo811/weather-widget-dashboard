@@ -36,6 +36,7 @@ export const processDailyForecast = (forecast: ForecastData): ForecastDailyData[
 
 export const processHourlyForecast = (forecast: ForecastData): ForecastHourlyData[] => {
     return forecast.list.slice(0, 12).map(item => ({
+        date: new Date(item.dt * 1000).toLocaleDateString(),
       time: new Date(item.dt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       temp: item.main.temp,
       feels_like: item.main.feels_like,

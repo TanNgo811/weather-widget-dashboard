@@ -1,59 +1,50 @@
 import type {ForecastDailyData, ForecastHourlyData, WeatherData} from "@/types/weather.ts";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useCallback} from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Calendar, CloudRain, Wind} from "lucide-react";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {Badge} from "@/components/ui/badge.tsx";
 import {convertFromDegToNavigation, processDailyForecast, processHourlyForecast} from "@/utils/helpers.ts";
 import {getCityList, getForecastData, getWeatherData, getWeatherIconUrl} from "@/services/weatherService.ts";
 import {toast} from "sonner";
 import {useAppStore} from "@/app/app.state.ts";
+import {useAutoRefresh} from "@/hooks/useAutoRefresh.ts";
 
-interface MainWeatherDashboardProps {
-  //
-}
-
-const SingaporeWeatherDashboard: React.FC<MainWeatherDashboardProps> = ({}) => {
-  const [forecastDays, setForecastDays] = useState(5);
-  const [forcastDailyData, setForecastDailyData] = useState<ForecastDailyData[]>([]);
+const SingaporeWeatherDashboard: React.FC = () => {
+  const [forecastDailyData, setForecastDailyData] = useState<ForecastDailyData[]>([]);
   const [forecastHourlyData, setForecastHourlyData] = useState<ForecastHourlyData[]>([]);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const appState = useAppStore()
-
+  const appState = useAppStore();
   
-  // Fetch Singapore weather data on component mount and set up auto-refresh
-  useEffect(() => {
-    const fetchSingaporeWeather = async () => {
-      try {
-        const data = await getCityList('Singapore');
-        if (data.length === 0) {
-          throw new Error("Could not find location 'Singapore'");
-        }
-        const { lat, lon } = data[0];
-        const weatherData = await getWeatherData(lat, lon);
-        setWeatherData(weatherData);
-        
-        const forecastData = await getForecastData(lat, lon);
-        // Process daily forecast data
-        const dailyForecastData = processDailyForecast(forecastData)
-        setForecastDailyData(dailyForecastData)
-        // Process hourly forecast data
-        const hourlyForecast: ForecastHourlyData[] = processHourlyForecast(forecastData)
-        setForecastHourlyData(hourlyForecast);
-      } catch (error) {
-        console.error('Error fetching Singapore weather:', error);
-        toast.error('Failed to fetch Singapore weather data');
-      } finally {
-        appState.setMainWeatherLoading(false);
+  const fetchSingaporeWeather = useCallback(async () => {
+    try {
+      const data = await getCityList('Singapore');
+      if (data.length === 0) {
+        throw new Error("Could not find location 'Singapore'");
       }
-    };
+      const { lat, lon } = data[0];
+      const weatherData = await getWeatherData(lat, lon);
+      setWeatherData(weatherData);
 
+      const forecastData = await getForecastData(lat, lon);
+      // Process daily forecast data
+      const dailyForecastData = processDailyForecast(forecastData)
+      setForecastDailyData(dailyForecastData)
+      // Process hourly forecast data
+      const hourlyForecast: ForecastHourlyData[] = processHourlyForecast(forecastData)
+      setForecastHourlyData(hourlyForecast);
+    } catch (error) {
+      console.error('Error fetching Singapore weather:', error);
+      toast.error('Failed to fetch Singapore weather data');
+    } finally {
+      appState.setMainWeatherLoading(false);
+    }
+  }, [appState]);
+  
+  useEffect(() => {
     fetchSingaporeWeather();
-
-    // Auto-refresh every 10 minutes
-    const interval = setInterval(fetchSingaporeWeather, 10 * 60 * 1000);
-    return () => clearInterval(interval);
   }, []);
+  
+  useAutoRefresh(fetchSingaporeWeather, true);
 
   if (!weatherData) {
     return (
@@ -69,7 +60,6 @@ const SingaporeWeatherDashboard: React.FC<MainWeatherDashboardProps> = ({}) => {
 
   return (
     <div className="space-y-6">
-      {/* Current Weather - Main Card */}
       <Card className="bg-white/20 backdrop-blur-md border-0 text-white overflow-hidden">
         <CardHeader className="pb-4">
           <CardTitle className="text-2xl flex items-center gap-2">
@@ -115,8 +105,7 @@ const SingaporeWeatherDashboard: React.FC<MainWeatherDashboardProps> = ({}) => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Hourly and Daily Forecast Tabs */}
+      
       <Tabs defaultValue="hourly" className="space-y-4">
         <TabsList className="bg-white/20 backdrop-blur-md border-0">
           <TabsTrigger value="hourly" className="data-[state=active]:bg-white/30">
@@ -140,12 +129,18 @@ const SingaporeWeatherDashboard: React.FC<MainWeatherDashboardProps> = ({}) => {
                 {forecastHourlyData.slice(0, 12).map((hour, index) => (
                   <div key={index} className="text-center p-3 rounded-lg bg-white/10">
                     <div className="text-sm opacity-80 mb-1">{hour.time}</div>
+                    {(hour.date && hour.date !== new Date().toLocaleDateString()) ? (
+                        <div className="text-xs opacity-80 mb-1">{new Date(hour.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
+                    ) : (
+                        <div className="h-[20px]">{}</div>
+                    )}
+                    
                     <img 
                       src={getWeatherIconUrl(hour.icon)} 
                       alt={hour.description} 
                       className="text-2xl mb-1"
                     />
-                    <div className="font-semibold text-lg">{hour.temp}°</div>
+                    <div className="font-semibold text-lg">{Math.floor(hour.temp)}°</div>
                     <div className="text-xs opacity-70">{hour.chanceOfRain}%</div>
                   </div>
                 ))}
@@ -159,28 +154,12 @@ const SingaporeWeatherDashboard: React.FC<MainWeatherDashboardProps> = ({}) => {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                {forecastDays}-Day Forecast
+                {forecastDailyData.length}-Day Forecast
               </CardTitle>
-              <div className="flex gap-2">
-                {[3, 5].map(days => (
-                  <Badge
-                    key={days}
-                    variant={forecastDays === days ? "default" : "outline"}
-                    className={`cursor-pointer ${
-                      forecastDays === days 
-                        ? 'bg-white text-black' 
-                        : 'bg-white/20 text-white border-white/30 hover:bg-white/30'
-                    }`}
-                    onClick={() => setForecastDays(days)}
-                  >
-                    {days} days
-                  </Badge>
-                ))}
-              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {forcastDailyData.slice(0, forecastDays).map((day, index) => (
+                {forecastDailyData.map((day, index) => (
                   <div key={index} className="grid grid-cols-3 items-center gap-4 p-4 rounded-lg bg-white/10">
                     <div className="flex items-center gap-4">
                       <img 
@@ -190,7 +169,7 @@ const SingaporeWeatherDashboard: React.FC<MainWeatherDashboardProps> = ({}) => {
                       />
                       <div>
                         <div className="font-semibold">{day.dayOfWeek}</div>
-                        <div className="text-sm opacity-80">{day.date}</div>
+                        <div className="text-sm opacity-80">{new Date(day.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
                       </div>
                     </div>
                     <div className="text-center">

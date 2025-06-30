@@ -96,6 +96,7 @@ export interface ForecastDailyData extends ForecastDataItem{
 
 export interface ForecastHourlyData extends ForecastDataItem{
     time: string;
+    date?: string;
 }
 
 export interface SelectedCityItem {
